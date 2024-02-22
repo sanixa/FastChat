@@ -115,10 +115,11 @@ class VLLMWorker(BaseModelWorker):
             presence_penalty=presence_penalty,
             frequency_penalty=frequency_penalty,
             best_of=best_of,
+            seed=42,
         )
         results_generator = engine.generate(context, sampling_params, request_id)
-
         async for request_output in results_generator:
+            print('request_output.outputs', request_output.outputs)
             prompt = request_output.prompt
             if echo:
                 text_outputs = [
@@ -279,12 +280,14 @@ if __name__ == "__main__":
         "memory (OOM) errors.",
     )
 
+
     parser = AsyncEngineArgs.add_cli_args(parser)
     args = parser.parse_args()
     if args.model_path:
         args.model = args.model_path
     if args.num_gpus > 1:
         args.tensor_parallel_size = args.num_gpus
+    args.seed = 42
 
     engine_args = AsyncEngineArgs.from_cli_args(args)
     engine = AsyncLLMEngine.from_engine_args(engine_args)
